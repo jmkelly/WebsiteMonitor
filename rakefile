@@ -1,0 +1,28 @@
+﻿require 'albacore'
+task :default => [:build, :zip]
+
+desc 'Build the release configuation'
+msbuild :build do |msb|
+    msb.solution = 'WebsiteMonitor.sln'
+    msb.targets = [:Clean, :Build ]
+    msb.properties = { :Configuration => 'Release' }
+    puts 'build completed'
+end
+
+desc 'Increment the file and assembly version'
+assemblyinfo :version do |asm|
+    asm.version = ENV['version'] || '0.0.0'
+    asm.file_version = asm.version
+    asm.input_file = 'AssemblyInfo.cs'
+    asm.output_file = asm.input_file
+end
+
+desc 'Zip out the output'
+zip :zip do |zip|
+    zip.directories_to_zip 'WebsiteMonitor/bin/release'
+    zip.output_file = 'WebsiteMonitor.zip'
+    zip.exclusions  /\.pdb$/
+    zip.output_path = File.dirname(__FILE__) 
+    puts 'Zipping completed'
+       
+end
